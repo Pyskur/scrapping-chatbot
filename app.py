@@ -8,6 +8,7 @@ from langchain.embeddings.openai import OpenAIEmbeddings
 from langchain.text_splitter import CharacterTextSplitter
 from langchain.vectorstores import FAISS
 from langchain.chains.question_answering import load_qa_chain
+from langchain.chains.qa_with_sources import load_qa_with_sources_chain
 from langchain.llms import OpenAI
 from langchain.docstore.document import Document
 from langchain.prompts import PromptTemplate
@@ -38,7 +39,8 @@ PROMPT = PromptTemplate(
     template=prompt_template, input_variables=["context", "question"]
 )
 
-chain = load_qa_chain(OpenAI(temperature=0), chain_type="stuff", prompt=PROMPT)
+# chain = load_qa_chain(OpenAI(temperature=0), chain_type="stuff", prompt=PROMPT)
+chain = load_qa_with_sources_chain(OpenAI(temperature=0), chain_type="stuff")
 if os.path.exists(dir_name + "/index.faiss"):
     docsearch = FAISS.load_local(dir_name, OpenAIEmbeddings())
 else:
@@ -48,8 +50,10 @@ else:
 def chat():
     query = request.form["prompt"]
     docs = docsearch.similarity_search(query)
-    completion = chain.run(input_documents=docs, question=query)
-    return {"answer": completion }
+    # completion = chain.run(input_documents=docs, question=query)
+    completion = chain({"input_documents": docs, "question": query}, return_only_outputs=True)
+    print(completion)
+    return {"answer": "123" }
 
 if __name__ == '__main__':
     app.run(debug=True)
