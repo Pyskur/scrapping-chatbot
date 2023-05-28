@@ -28,14 +28,14 @@ if "https" in url:
 else:
     dir_name += url.replace("http", "").replace("/", "").replace(":", "")
 
-prompt_template = """Use the following pieces of context to answer the question at the end. This context is for selling, so answer any questions if a customer ask for selling, answer in details about it. If selling is not available, answer to customer in most similar thing which is available for selling. If question is not related to context, just say that it is not related to context, don't try to make up an answer.
+prompt_template = """You're a sales chatbot from {url}. Use the following pieces of context to answer the question at the end. This context is for selling, so answer any questions if a customer ask for selling, answer in details about it. If selling is not available, answer to customer in most similar thing which is available for selling. If question is not related to context, just say that it is not related to context, don't try to make up an answer.
 
 {context}
 
 Question: {question}
 Answer in English:"""
 PROMPT = PromptTemplate(
-    template=prompt_template, input_variables=["context", "question"]
+    template=prompt_template, input_variables=["context", "question", "url"]
 )
 
 chain = load_qa_chain(OpenAI(temperature=0), chain_type="stuff", prompt=PROMPT)
@@ -48,7 +48,7 @@ else:
 def chat():
     query = request.form["prompt"]
     docs = docsearch.similarity_search(query)
-    completion = chain.run(input_documents=docs, question=query)
+    completion = chain.run(input_documents=docs, question=query, url=url)
     return {"answer": completion }
 
 if __name__ == '__main__':
