@@ -70,26 +70,26 @@ for item in urlList:
 text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=0)
 # docs = text_splitter.split_text(text)
 docs = []
-scrapping_index = []
+# scrapping_index = []
 index = 0
 for textItem in text:
     subdocs = text_splitter.split_text(textItem)
     for it in subdocs:
-        docs.append(it)
-        scrapping_index.append(index)
+        docs.append(Document(page_content=it, source=urlList[index]))
+        # scrapping_index.append(index)
     index += 1
 
-with open(f"store/{dirUrl}/urlIndex.txt", "w", encoding="utf-8") as file:
-    for ii in range(0, len(scrapping_index)):
-        file.write("" + str(ii) + ":" + str(scrapping_index[ii]) + "\n")
+# with open(f"store/{dirUrl}/urlIndex.txt", "w", encoding="utf-8") as file:
+#     for ii in range(0, len(scrapping_index)):
+#         file.write("" + str(ii) + ":" + str(scrapping_index[ii]) + "\n")
 
 # for doc_item in docs:
 #     document = Document(page_content=doc_item)
 #     vector_db.add_documents([document])
 
-docsDocument = []
-for doc_item in docs:
-    docsDocument.append(Document(page_content=doc_item))
+# docsDocument = []
+# for doc_item in docs:
+#     docsDocument.append(Document(page_content=doc_item))
 
 vector_db = None
 dir_name = "./store/" + dirUrl
@@ -97,7 +97,7 @@ dir_name = "./store/" + dirUrl
 if os.path.exists(dir_name + "/index.faiss"):
     vector_db = FAISS.load_local(dir_name, OpenAIEmbeddings())
 else:   
-    vector_db = FAISS.from_documents(docsDocument, OpenAIEmbeddings())
+    vector_db = FAISS.from_documents(docs, OpenAIEmbeddings())
 
 vector_db.save_local(dir_name)
 print("completed")

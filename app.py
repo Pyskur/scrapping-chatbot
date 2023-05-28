@@ -50,10 +50,10 @@ else:
 def chat():
     query = request.form["prompt"]
     docs = docsearch.similarity_search(query)
-    # completion = chain.run(input_documents=docs, question=query)
-    completion = chain({"input_documents": docs, "question": query}, return_only_outputs=True)
-    print(completion)
-    return {"answer": "123" }
+    completion, source_doc = chain.run(input_documents=docs, question=query)
+    # completion = chain({"input_documents": docs, "question": query}, return_only_outputs=True)
+    print(source_doc)
+    return {"answer": completion }
 
 if __name__ == '__main__':
     app.run(debug=True)
