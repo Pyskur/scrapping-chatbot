@@ -38,11 +38,14 @@ PROMPT = PromptTemplate(
     template=prompt_template, input_variables=["context", "question", "url"]
 )
 
-chain = load_qa_chain(OpenAI(temperature=0), chain_type="stuff", prompt=PROMPT)
+llm = OpenAI(temperature=0)
+embeddings = OpenAIEmbeddings()
+
+chain = load_qa_chain(llm, chain_type="stuff", prompt=PROMPT)
 if os.path.exists(dir_name + "/index.faiss"):
-    docsearch = FAISS.load_local(dir_name, OpenAIEmbeddings())
+    docsearch = FAISS.load_local(dir_name, embeddings)
 else:
-    docsearch = FAISS.from_documents([Document(page_content="I don\'t know\n\n")], OpenAIEmbeddings())
+    docsearch = FAISS.from_documents([Document(page_content="I don\'t know\n\n")], embeddings)
 
 @app.route('/api/chat', methods=['POST'])
 def chat():
