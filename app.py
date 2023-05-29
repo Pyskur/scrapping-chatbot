@@ -16,6 +16,7 @@ from langchain.agents import Tool
 from langchain.memory import ConversationBufferMemory
 from langchain.agents import initialize_agent
 from langchain.agents import AgentType
+from langchain.chains import ConversationChain
 
 from dotenv import load_dotenv
 
@@ -55,6 +56,16 @@ if os.path.exists(dir_name + "/index.faiss"):
 else:
     docsearch = FAISS.from_documents([Document(page_content="I don\'t know\n\n")], embeddings)
 
+conversation = ConversationChain(
+    llm=llm, 
+    verbose=True, 
+    memory=ConversationBufferMemory()
+)
+
+def get_chat_history(query):
+    completion = conversation.predict(input=query)
+    return completion
+
 def get_result(query):
     docs = docsearch.similarity_search(query)
     # completion, source = chain.run(input_documents=docs, question=query, url=url)
@@ -70,7 +81,7 @@ tools = [
     ),
     Tool(
         name = "Answers from chat history",
-        func=get_result,
+        func=get_chat_history,
         description="useful for when you need to answer questions based from your memory",
         return_direct=True
     ),
@@ -85,6 +96,7 @@ def chat():
     # docs = docsearch.similarity_search(query)
     # completion = chain({"input_documents": docs, "question": query, "url": url}, return_only_outputs=True)
     # completion = get_result(query)
+    completion = conversation.predict(input=query)
     completion = agent_chain.run(query)
     return {"answer": completion }
 
