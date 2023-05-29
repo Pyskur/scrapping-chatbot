@@ -17,6 +17,9 @@ urlList = []
 url = os.environ['SCRAP_WEBSITE']
 dirUrl = url.replace("https", "").replace("/", "").replace(":", "")
 
+if not os.path.exists(f"store/{dirUrl}/"):
+    os.mkdir(f"store/{dirUrl}/")
+
 if os.path.exists(f"store/{dirUrl}/urlList.txt"):
     with open(f"store/{dirUrl}/urlList.txt", "r", encoding="utf-8") as file:
         for line in file:
@@ -75,7 +78,9 @@ index = 0
 for textItem in text:
     subdocs = text_splitter.split_text(textItem)
     for it in subdocs:
-        docs.append(Document(page_content=it, source=urlList[index]))
+        # docs.append(Document(page_content=it, source=urlList[index]))
+        oneDoc = Document(page_content=it, metadata={"source": urlList[index]})
+        docs.append(oneDoc)
         # scrapping_index.append(index)
     index += 1
 
