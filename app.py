@@ -11,6 +11,11 @@ from langchain.chains.question_answering import load_qa_chain
 from langchain.llms import OpenAI
 from langchain.docstore.document import Document
 from langchain.prompts import PromptTemplate
+from langchain.agents import Tool
+from langchain.memory import ConversationBufferMemory
+from langchain.agents import initialize_agent
+from langchain.agents import AgentType
+
 from dotenv import load_dotenv
 
 import pickle
@@ -42,16 +47,33 @@ llm = OpenAI(temperature=0)
 embeddings = OpenAIEmbeddings()
 
 chain = load_qa_chain(llm, chain_type="stuff", prompt=PROMPT)
+
 if os.path.exists(dir_name + "/index.faiss"):
     docsearch = FAISS.load_local(dir_name, embeddings)
 else:
     docsearch = FAISS.from_documents([Document(page_content="I don\'t know\n\n")], embeddings)
 
+def get_result(query):
+    docs = docsearch.similarity_search(query)
+    completion = chain.run(input_documents=docs, question=query, url=url)
+    return completion
+
+tools = [
+    Tool(
+        name = "Current Search",
+        func=get_result,
+        description="useful for when you need to answer questions about current events or the current state of the world"
+    ),
+]
+memory = ConversationBufferMemory(memory_key="chat_history")
+agent_chain = initialize_agent(tools, llm, agent=AgentType.CONVERSATIONAL_REACT_DESCRIPTION, verbose=True, memory=memory)
+
 @app.route('/api/chat', methods=['POST'])
 def chat():
     query = request.form["prompt"]
-    docs = docsearch.similarity_search(query)
-    completion = chain.run(input_documents=docs, question=query, url=url)
+    # docs = docsearch.similarity_search(query)
+    # completion = chain.run(input_documents=docs, question=query, url=url)
+    completion = agent_chain.run(query)
     return {"answer": completion }
 
 if __name__ == '__main__':
