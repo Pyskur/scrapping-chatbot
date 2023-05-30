@@ -38,7 +38,7 @@ prompt_template = """You're a sales chatbot from {url} having a conversation wit
 {chat_history}
 Human: {question}
 Chatbot: 
-Answer in English:"""
+Answer in language of question:"""
 PROMPT = PromptTemplate(
     template=prompt_template, input_variables=["chat_history", "summaries", "question", "url"]
 )
