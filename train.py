@@ -44,6 +44,7 @@ else:
 
     scrap_page(url)
     urlList = list(set(urlList))
+    urlList = sorted(urlList, key=lambda url: url.count('/'))
 
     with open(f"store/{dirUrl}/urlList.txt", "w", encoding="utf-8") as file:
         for urlItem in urlList:
@@ -61,14 +62,18 @@ for item in urlList:
     subtext = ""
     for subdata in data:
         subtext += subdata.page_content
+    subtext = '\n'.join([line for line in subtext.split('\n') if line.strip()])
     text.append(subtext)
 
-# for doc in document:
-#     text += doc.page_content
+# totaltext = ""
+# for textitem in text:
+#     totaltext += textitem
 
-# with open("scrapping.txt", "w", encoding="utf-8") as file:
+# with open("develop/scrapping.txt", "w", encoding="utf-8") as file:
 #     # Write the string to the file
-#     file.write(text)
+#     file.write(totaltext)
+
+# exit(0)
 
 text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=0)
 # docs = text_splitter.split_text(text)
