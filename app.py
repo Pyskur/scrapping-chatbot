@@ -19,16 +19,12 @@ import pickle
 
 load_dotenv()
 
-url = os.environ['SCRAP_WEBSITE']
+url = os.environ['DOCUMENT_DIRECTORY']
 
 app = Flask(__name__)
 CORS(app)
 
-dir_name = "./store/"
-if "https" in url:
-    dir_name += url.replace("https", "").replace("/", "").replace(":", "")
-else:
-    dir_name += url.replace("http", "").replace("/", "").replace(":", "")
+dir_name = "./store/" + url
 
 prompt_template = """You're a sales chatbot from {url} having a conversation with a human. Use the following pieces of context to answer the question at the end. This context is for selling, so answer any questions if a customer ask for selling, answer in details about it. If selling is not available, answer to customer in most similar thing which is available for selling. If question is not related to context, just say that it is not related to website, don't try to make up an answer. Create a final answer with references ("SOURCES").
 
